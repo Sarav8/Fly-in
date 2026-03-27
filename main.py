@@ -12,7 +12,6 @@ from graph import Graph
 
 def main() -> None:
     """Run the drone simulation."""
-    # En la defensa, cambia 'False' por: "--capacity-info" in sys.argv
     capacity_info: bool = False
 
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
