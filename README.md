@@ -221,21 +221,20 @@ Result: **10 turns** — within the subject target of ≤ 12 for this map.
 
 ## Resources
 
-- [Dijkstra's algorithm — Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
-- [Depth-First Search — Wikipedia](https://en.wikipedia.org/wiki/Depth-first_search)
-- [Python heapq documentation](https://docs.python.org/3/library/heapq.html)
-- [Pygame documentation](https://www.pygame.org/docs/)
-- [PEP 257 — Docstring conventions](https://peps.python.org/pep-0257/)
-- [mypy documentation](https://mypy.readthedocs.io/)
+- Graph Algorithms for Technical Interviews - freeCodeCamp (YouTube)
+- Dijkstra's Algorithm in 3 Minutes - Computer Science (YouTube)
+- Depth First Search (DFS) Explained - CS Dojo (YouTube)
+- Stack Overflow - Graph Algorithms Discussions
+- Reddit - r/algorithms
+- Pygame documentation
+- PEP 257 — Docstring conventions
+- mypy documentation
 
 ### AI usage
 
-Claude (Anthropic) was used during this project for the following tasks:
 
-- Identifying bugs in the initial implementation (incorrect `is_accesible()` logic, enum vs string comparisons in the visualizer, duplicate neighbor registration)
-- Explaining the two-phase simultaneous movement pattern for the simulation engine
-- Reviewing the parser against the subject requirements and suggesting missing validations (duplicate connections, line numbers in error messages)
-- Generating boilerplate code for the Pygame visualizer layout
-- Drafting and structuring this README
-
-All generated code was reviewed, understood, tested, and adapted before inclusion in the project.
+- Brainstorming optimizations and refining the pathfinding algorithm strategy (combining DFS and Dijkstra).
+- Clarifying conceptual doubts regarding graph theory, Python type hinting, and OOP principles.
+- Translating texts and polishing the English phrasing for the documentation and code comments.
+- Generating code for the Pygame visualizer layout to save time on GUI setup.
+- Drafting and structuring this README.

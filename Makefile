@@ -3,7 +3,8 @@ PYTHON = $(VENV)/bin/python
 PIP = $(VENV)/bin/pip
 
 MAIN = main.py
-CONFIG_FILE = C:\Users\sarav\Documents\C_telefonica\Fly-in\maps\challenger\01_the_impossible_dream.txt
+FILES = drone.py graph.py parser.py pathfinder.py simulation.py utils.py visualizer.py zones.py
+CONFIG_FILE = maps/hard/03_ultimate_challenge.txt
 PROJECT_CONFIG = pyproject.toml
 
 all: banner install run
@@ -33,7 +34,7 @@ debug: install
 lint: install
 	@echo "Linters"
 	@echo "- Check flake8..."
-	@$(PYTHON) -m flake8 .
+	$(PYTHON) -m flake8 $(MAIN) $(FILES)
 	@echo "- Check mypy..."
 	@$(PYTHON) -m mypy . --warn-return-any --warn-unused-ignores \
 		--ignore-missing-imports --disallow-untyped-defs \

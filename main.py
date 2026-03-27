@@ -6,24 +6,24 @@ from drone import Drone
 from simulation import Simulation
 from visualizer import DroneVisualizer
 from utils import Colors
+from zones import TypeZone
+from graph import Graph
 
 
 def main() -> None:
     """Run the drone simulation."""
-    # Detect --capacity-info flag
-    capacity_info: bool = "--capacity-info" in sys.argv
+    # En la defensa, cambia 'False' por: "--capacity-info" in sys.argv
+    capacity_info: bool = False
 
-    # Filter flags, keep only the map file argument
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
 
     if len(args) != 1:
         print("Usage: python main.py [--capacity-info] <map_file>")
         print("Example: python main.py 03_priority_puzzle.txt")
-        sys.exit(1)
+        sys.exit
 
     file_path = args[0]
 
-    # Parse map
     print("\n=== PARSING MAP ===")
     p = Parser(file_path)
     p.read_file()
@@ -34,24 +34,14 @@ def main() -> None:
     print(f"Zones:       {len(p.graph.zones)}")
     print(f"Connections: {len(p.graph.link_capacity)}")
 
-    # Find paths
-    print("\n=== CALCULATING ROUTES ===")
     all_paths = get_all_paths(p.graph, p.start_node, p.end_node)
 
     if not all_paths:
         print("Error: no route found from start to end.")
         sys.exit(1)
 
-    print(f"Routes found: {len(all_paths)}")
-    for i, path in enumerate(all_paths):
-        cost = sum(p.graph.zones[n].cost for n in path[1:])
-        print(f"  Route {i + 1}: {' -> '.join(path)}  (cost {cost})")
-
-    # Assign routes to drones
     drone_routes = assign_drones_to_paths(p.nb_drones, all_paths, p.graph)
 
-    # Create drones
-    print("\n=== CREATING DRONES ===")
     drones: list[Drone] = []
     start_zone = p.graph.zones[p.start_node]
 
@@ -61,12 +51,10 @@ def main() -> None:
         drone.current_zone = p.start_node
         start_zone.current_drones += 1
         drones.append(drone)
-        print(f"  D{drone.id} -> route: {' -> '.join(drone.route)}")
 
-    # Choose execution mode
     print("\nHow do you want to run the simulation?")
-    print("  1 - Terminal only (faster)")
-    print("  2 - Terminal + Pygame visualizer")
+    print("  1 - Terminal only")
+    print("  2 - Terminal + visualizer")
     choice = input("Choose (1/2): ").strip()
 
     sim = Simulation(p.graph, drones)
@@ -77,57 +65,61 @@ def main() -> None:
         _run_terminal(sim, capacity_info)
 
 
+def _print_colored_line(line: str, sim: Simulation) -> None:
+    """Helper function to print a line with proper zone colors."""
+    c = Colors()
+    tokens = line.split()
+    colored = []
+
+    for token in tokens:
+        parts = token.split("-")
+        dest = parts[-1]
+
+        if len(parts) >= 3:
+            colored.append(c.color_text(token, "orange"))
+            continue
+
+        zone = sim.graph.zones.get(dest)
+        if zone is None:
+            colored.append(token)
+            continue
+
+        if zone.color:
+            color_name = zone.color
+        else:
+            if zone.type == TypeZone.priority:
+                color_name = "cyan"
+            elif zone.type == TypeZone.restricted:
+                color_name = "purple"
+            elif zone.type == TypeZone.blocked:
+                color_name = "red"
+            else:
+                color_name = "blue"
+
+        colored.append(c.color_text(token, color_name))
+
+    print(" ".join(colored))
+
+
 def _run_terminal(sim: Simulation, capacity_info: bool = False) -> None:
     """Run simulation and print colored terminal output."""
-    from zones import TypeZone  # Asegúrate de que TypeZone esté importado
     c = Colors()
     print(c.color_text("\n=== SIMULATION ===", "cyan"))
 
     while not sim._all_arrived():
         line = sim.step()
         if line:
-            tokens = line.split()
-            colored = []
-            for token in tokens:
-                parts = token.split("-")
-                dest = parts[-1]
-
-                # Movimiento en tránsito (restricted u overflow)
-                if len(parts) >= 3:
-                    colored.append(c.color_text(token, "orange"))
-                    continue
-
-                zone = sim.graph.zones.get(dest)
-                if zone is None:
-                    colored.append(token)
-                    continue
-
-                # Color por tipo de zona
-                if zone.color:
-                    color_name = zone.color
-                else:
-                    if zone.type == TypeZone.priority:
-                        color_name = "cyan"
-                    elif zone.type == TypeZone.restricted:
-                        color_name = "purple"
-                    elif zone.type == TypeZone.blocked:
-                        color_name = "red"
-                    else:
-                        color_name = "blue"
-
-                colored.append(c.color_text(token, color_name))
-            print(" ".join(colored))
+            _print_colored_line(line, sim)
 
         if capacity_info:
             _print_capacity(sim)
 
-    # Imprimir resumen final
     sim.print_summary()
 
 
 def _run_with_visualizer(
     sim: Simulation,
-    graph: object,
+    graph: Graph,
     drones: list[Drone],
     capacity_info: bool = False
 ) -> None:
@@ -153,7 +145,7 @@ def _run_with_visualizer(
 
         line = sim.step()
         if line:
-            print(line)
+            _print_colored_line(line, sim)
 
         if capacity_info:
             _print_capacity(sim)
@@ -167,14 +159,30 @@ def _run_with_visualizer(
 
 
 def _print_capacity(sim: Simulation) -> None:
-    """Print current drone count per zone after each turn."""
+    """Print current drone count per zone and connection after each turn."""
     c = Colors()
     info_parts = []
+
     for name, zone in sim.graph.zones.items():
         if zone.current_drones > 0:
             info_parts.append(
-                f"{name}:{zone.current_drones}/{zone.max_drones}"
+                f"Zone {name}:{zone.current_drones}/{zone.max_drones}"
             )
+
+    for drone in sim.drones:
+        if (
+            drone.state == "in_transit"
+            and drone.current_zone
+            and drone.target_restricted
+        ):
+            cap = sim.graph.get_link_capacity(
+                drone.current_zone, drone.target_restricted
+            )
+            info_parts.append(
+                f"Connection {drone.current_zone}-"
+                f"{drone.target_restricted}:1/{cap}"
+            )
+
     if info_parts:
         line = "  " + c.color_text("[capacity]", "yellow")
         line += " " + "  ".join(info_parts)

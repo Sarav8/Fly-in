@@ -179,7 +179,6 @@ class Simulation:
             drone.route.pop(0)
         return f"D{drone.id}-{dest}"
 
-
     def active_drones(self) -> list[Drone]:
         """Return drones that have not reached the end."""
         end_name = next(
@@ -195,23 +194,7 @@ class Simulation:
         return len(self.active_drones()) == 0
 
     def print_summary(self) -> None:
-        """Print final summary with colors."""
+        """Print final summary stats."""
         c = Colors()
         print(c.color_text(f"\nTotal turns: {self.turn}", "cyan"))
         print(c.color_text(f"Drones: {len(self.drones)}", "cyan"))
-
-        for line in self.log:
-            tokens = line.split()
-            colored_tokens = []
-
-            for token in tokens:
-                if "->" in token or token.count("-") >= 2:
-                    colored_tokens.append(
-                        c.color_text(token, "orange")
-                    )
-                else:
-                    colored_tokens.append(
-                        c.color_text(token, "green")
-                    )
-
-            print(" ".join(colored_tokens))

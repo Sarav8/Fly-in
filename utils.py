@@ -10,7 +10,6 @@ class Colors:
 
     def __init__(self) -> None:
         """Initialize color mappings."""
-        # Terminal colors
         self.colors_ascii: Dict[str, str] = {
             "red": "\033[91m",
             "green": "\033[92m",
@@ -22,9 +21,15 @@ class Colors:
             "purple": "\033[35m",
             "cyan": "\033[96m",
             "rainbow": "\033[38;5;201m",
+            "maroon": "\033[38;2;128;0;0m",
+            "black": "\033[90m",
+            "brown": "\033[38;2;139;69;19m",
+            "gold": "\033[38;2;255;215;0m",
+            "darkred": "\033[38;2;139;0;0m",
+            "violet": "\033[38;2;238;130;238m",
+            "crimson": "\033[38;2;220;20;60m",
         }
 
-        # RGB colors (for graphics)
         self.rgb: Dict[str, Tuple[int, int, int]] = {
             "red": (255, 0, 0),
             "green": (0, 255, 0),
@@ -35,6 +40,13 @@ class Colors:
             "purple": (128, 0, 128),
             "cyan": (0, 255, 255),
             "rainbow": (148, 0, 211),
+            "maroon": (128, 0, 0),
+            "black": (50, 50, 50),
+            "brown": (139, 69, 19),
+            "gold": (255, 215, 0),
+            "darkred": (139, 0, 0),
+            "violet": (238, 130, 238),
+            "crimson": (220, 20, 60),
         }
 
     def get_rgb(self, color_name: str) -> Tuple[int, int, int]:
